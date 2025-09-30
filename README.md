@@ -1,3 +1,9 @@
+1. Install 
+composer require quyle91/wp-database-helper-v2:dev-main
+composer update quyle91/wp-database-helper-v2 --prefer-source --no-cache
+
+
+
 1. Khai báo Field
 
 ```php
