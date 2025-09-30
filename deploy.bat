@@ -3,7 +3,7 @@ rem Script to copy and synchronize source folder with Git folder
 
 rem Define variables for source folder and Git folder
 set SOURCE_FOLDER=D:\Laragon\www\flatsome\wp-content\plugins\administrator-z\vendor\quyle91\wp-database-helper-v2
-set GIT_FOLDER=D:\source\git\wp-database-helper\
+set GIT_FOLDER=D:\source\git\wp-database-helper-v2\
 
 rem Display folder paths
 echo ::: Source Folder: %SOURCE_FOLDER%
@@ -32,7 +32,7 @@ git add .
 
 rem Commit changes
 echo ::: Committing changes...
-git commit -m "wp-database-helper new release date %date% %time%"
+git commit -m "wp-database-helper-v2 new release date %date% %time%"
 
 rem Push changes to remote repository
 echo ::: Pushing changes to remote repository...

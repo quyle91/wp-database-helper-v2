@@ -4,7 +4,7 @@ composer update quyle91/wp-database-helper-v2 --prefer-source --no-cache
 
 
 
-1. Khai báo Field
+2. Khai báo Field
 
 ```php
 $field = WpField::make('input', 'custom_text')
@@ -17,7 +17,7 @@ $field = WpField::make('input', 'custom_text')
     ->show_in_admin(true);
 ```
 
-2. Khai báo Repeater
+3. Khai báo Repeater
 ```php
 $nestedRepeater = WpRepeater::make('my_repeater')
     ->label('Level 1')
@@ -110,7 +110,7 @@ $_POST['my_repeater'] = [
 ];
 ```
 
-3. Khai báo Metabox (Post Meta)
+4. Khai báo Metabox (Post Meta)
 ```php
 WpMeta::make('page')
     ->metabox('Page Settings')
@@ -150,7 +150,7 @@ DB: meta_value
 ```
 
 
-4. Khai báo Taxonomy Meta
+5. Khai báo Taxonomy Meta
 ```php
 WpMeta::make_taxonomy('category')
     ->metabox('Category Extra')
@@ -164,7 +164,7 @@ WpMeta::make_taxonomy('category')
 ```
 
 
-5. Khai báo Table
+6. Khai báo Table
 ```php
 WpDatabase::make('custom_table')
     ->menu_title('Custom Table')
@@ -179,7 +179,7 @@ WpDatabase::make('custom_table')
     ->register();
 ```
 
-6. Khai báo “Config Page”
+7. Khai báo “Config Page”
 ```php
 // Đây là option page cho admin nhập cấu hình
 WpMeta::make('page')
