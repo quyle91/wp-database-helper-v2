@@ -53,11 +53,11 @@
         reindexRepeater($repeater);
     });
 
-    $(document).ready(function () {
-        $('.wpdh-repeater').each(function () {
-            reindexRepeater($(this));
-        });
-    });
+    // $(document).ready(function () {
+    //     $('.wpdh-repeater').each(function () {
+    //         reindexRepeater($(this));
+    //     });
+    // });
 
     // up item
     $(document).on('click', '.wpdh-up', function (e) {
@@ -70,6 +70,30 @@
             $item.insertBefore($prev);
             reindexRepeater($repeater);
         }
+    });
+
+    function collectRepeaterData($repeater) {
+        const data = {};
+        const base = $repeater.data('base');
+
+        $repeater.find('input[name], textarea[name], select[name]').each(function () {
+            const $el = $(this);
+            const name = $el.attr('name') || '';
+            const val = $el.val();
+
+            // giữ nguyên toàn bộ name, không cắt
+            data[name] = val;
+        });
+
+        return data;
+    }
+
+    // test button
+    $(document).on('click', '.wpdh-debug', function (e) {
+        e.preventDefault();
+        const $repeater = $(this).closest('.wpdh-repeater');
+        const data = collectRepeaterData($repeater);
+        console.log('Repeater:', $repeater.data('name'), data);
     });
 
 })(jQuery);

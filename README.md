@@ -282,10 +282,6 @@ wp-database-helper-v2/
 │  │  └─ repeater.js
 ├─ src/
 │  ├─ Bootstrap.php          # init composer bindings, service container (simple)
-│  ├─ Controllers/
-│  │  └─ AdminController.php
-│  ├─ Models/
-│  │  └─ OptionModel.php
 │  ├─ Services/
 │  │  └─ Renderer.php
 │  ├─ Fields/
@@ -298,17 +294,13 @@ wp-database-helper-v2/
 │  └─ Helpers/
 │     └─ Arr.php
 ├─ views/
-│  ├─ admin/
-│  │  └─ options-page.php
 │  └─ fields/
 │     ├─ field-text.php
 └─    └─ field-repeater.php
 
 
-101. Use
+101. Use example
 ```php
-add_action('plugins_loaded', function () {
-    $bootstrap = new \WpDatabaseHelperV2\Bootstrap();
-    $bootstrap->init();
-});
+$bootstrap = new \WpDatabaseHelperV2\Bootstrap();
+$bootstrap->init();
 ```

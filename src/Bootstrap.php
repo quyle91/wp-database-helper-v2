@@ -1,49 +1,88 @@
 <?php
 
 namespace WpDatabaseHelperV2;
-use WpDatabaseHelperV2\Services\Assets;
-use WpDatabaseHelperV2\Controllers\AdminController;
+
+use \WpDatabaseHelperV2\Meta\WpMeta;
+use \WpDatabaseHelperV2\Fields\WpField;
+use \WpDatabaseHelperV2\Fields\WpRepeater;
 
 class Bootstrap {
-
     public static function run() {
         (new self())->init();
     }
 
     public function init() {
-
         // tạo assets service, đăng ký (register) sẵn
-        $assets = new Assets();
-        add_action('admin_init', [$assets, 'enqueue']);
+        \WpDatabaseHelperV2\Services\Assets::get_instance();
 
-        // register admin menu
-        add_action('admin_menu', function () {
-            add_menu_page(
-                'WP DB Helper',
-                'WP DB Helper',
-                'manage_options',
-                'wp-db-helper',
-                [new AdminController(), 'optionsPage'],
-                'dashicons-database',
-                80
-            );
-        });
+        add_action('init', function () {
 
-        // register metabox example (could be dynamic)
-        add_action('add_meta_boxes', function () {
-            \WpDatabaseHelperV2\Meta\WpMeta::make('page')
-                ->metabox('Page Settings')
+            WpMeta::make('page')
+                ->metabox('Complex Settings')
                 ->fields([
-                    \WpDatabaseHelperV2\Fields\WpField::make('text', 'custom_text')->label('Custom Text'),
-                    \WpDatabaseHelperV2\Fields\WpRepeater::make('my_repeater')->label('Repeater')->fields([
-                        \WpDatabaseHelperV2\Fields\WpField::make('text', 'title')->label('Title'),
-                        \WpDatabaseHelperV2\Fields\WpField::make('text', 'value')->label('Value'),
-                    ])
+
+                    // Field cơ bản
+                    WpField::make('text', '___page_subtitle')
+                        ->label('Subtitle')
+                        ->attribute(['placeholder' => 'Enter subtitle'])
+                        ->default('This is default subtitle')
+                        ->adminColumn(true),
+
+                    // Repeater cấp 1: FAQ
+                    WpRepeater::make('___faq_list')
+                        ->label('FAQ List')
+                        ->fields([
+
+                            WpField::make('text', '___question')
+                                ->label('Question')
+                                ->default('Question'),
+
+                            WpField::make('textarea', '___answer')
+                                ->label('Answer')
+                                ->default('Answer'),
+
+                            // Repeater cấp 2: Related links (default riêng)
+                            WpRepeater::make('___related_links')
+                                ->label('Related Links')
+                                ->fields([
+
+                                    WpField::make('text', '___link_title')
+                                        ->label('Link Title')
+                                        ->default('Link Title'),
+
+                                    WpField::make('text', '___link_url')
+                                        ->label('Link URL')
+                                        ->default('Link URL'),
+                                ])
+                                ->default([
+                                    [
+                                        '___link_title' => 'Link Title',
+                                        '___link_url'   => 'Link URL',
+                                    ]
+                                ]),
+                        ])
+                        ->default([
+                            [
+                                '___question' => 'What is this site?',
+                                '___answer'   => 'This is a demo.',
+                            ],
+                            [
+                                '___question' => 'How to contact us?',
+                                '___answer'   => 'Use the form below.',
+                                '___related_links' => [
+                                    [
+                                        '___link_title' => 'Docs',
+                                        '___link_url' => 'https://docs.local',
+                                    ],
+                                    [
+                                        '___link_title' => 'Docs 2',
+                                        '___link_url' => 'https://docs.local2',
+                                    ],
+                                ],
+                            ],
+                        ]),
                 ])
                 ->register();
         });
-
-        // save_post hook centralized
-        add_action('save_post', [\WpDatabaseHelperV2\Meta\WpMeta::class, 'savePostMeta'], 10, 2);
     }
 }

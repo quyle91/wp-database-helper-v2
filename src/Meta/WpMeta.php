@@ -26,25 +26,38 @@ class WpMeta {
     }
 
     public function register() {
-        add_meta_box(
-            "wpdh_{$this->post_type}_metabox",
-            $this->metabox_label,
-            [$this, 'renderMetaBox'],
-            $this->post_type,
-            'normal',
-            'default'
-        );
+        // metabox
+        add_action('add_meta_boxes', function () {
+            add_meta_box(
+                "wpdh_{$this->post_type}_metabox",
+                $this->metabox_label,
+                [$this, 'renderMetaBox'],
+                $this->post_type,
+                'normal',
+                'default'
+            );
+        });
+
+        // save meta
+        add_action('save_post', function ($post_id, $post) {
+            self::savePostMeta($post_id, $post, $this->fields);
+        }, 10, 2);
     }
 
+    // D:\Laragon\www\flatsome\wp-content\plugins\administrator-z\vendor\quyle91\wp-database-helper-v2\src\Meta\WpMeta.php
     public function renderMetaBox($post) {
         echo '<div class="wpdh-metabox">';
         foreach ($this->fields as $field) {
+
+            // pass value = '' or false, false mean not exists
+            $dbValue = get_post_meta($post->ID, $field->getName(), true);
+            $dbValue = metadata_exists('post', $post->ID, $field->getName()) ? $dbValue : false;
+            
+            // giữ lại if else để dễ debug
             if ($field instanceof WpRepeater) {
-                $saved = get_post_meta($post->ID, $field->getName(), true);
-                echo $field->render($saved ?? [], '');
+                echo $field->render($dbValue, '', null);
             } else if ($field instanceof WpField) {
-                $val = get_post_meta($post->ID, $field->getName(), true);
-                echo $field->render($val, '');
+                echo $field->render($dbValue, '', null);
             }
         }
         wp_nonce_field('wpdh_save_meta', 'wpdh_nonce');
@@ -59,7 +72,7 @@ class WpMeta {
 
         // Here you should map expected fields. For demo we will loop $_POST keys prefixed by known field names.
         // In real project, store the schema somewhere to know which keys to save.
-        $allowed_keys = array_keys((array) get_post_meta($post_id)); // naive, replace with schema
+        // $allowed_keys = array_keys((array) get_post_meta($post_id)); // naive, replace with schema
         // Simpler: check posted data and save them
         foreach ($_POST as $key => $value) {
             if (in_array($key, ['post_title', 'post_content', 'action', 'wpdh_nonce', '_wpnonce', '_wp_http_referer'])) continue;

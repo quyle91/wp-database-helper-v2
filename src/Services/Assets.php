@@ -7,14 +7,19 @@ class Assets {
     protected string $plugin_dir;
     protected string $plugin_url;
 
+    private static $instance = null;
+    public static function get_instance() {
+        if (is_null(self::$instance)) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
     public function __construct() {
-        // absolute path (filesystem)
         $this->plugin_dir = wp_normalize_path(dirname(__DIR__, 2));
-
-        // convert absolute path to URL
         $this->plugin_url = $this->getPluginUrl($this->plugin_dir);
-
         $this->version = $this->getVersion();
+        add_action('admin_init', [$this, 'enqueue']);
     }
 
     private function getVersion(): string {
@@ -40,12 +45,11 @@ class Assets {
 
     // register script/style
     public function enqueue(): void {
-        $js_path  = 'assets/js/repeater.js';
-        $css_path = 'assets/css/repeater.css';
 
+        // repeater
         wp_enqueue_script(
             'wpdh-repeater',
-            $this->plugin_url . '/' . $js_path,
+            "$this->plugin_url/assets/js/repeater.js",
             ['jquery'],
             $this->version,
             true
@@ -53,14 +57,46 @@ class Assets {
 
         wp_enqueue_style(
             'wpdh-repeater',
-            $this->plugin_url . '/' . $css_path,
+            "$this->plugin_url/assets/css/repeater.css",
             [],
             $this->version
         );
 
-        wp_localize_script('wpdh-repeater', 'Wpdh', [
+        // meta
+        wp_enqueue_script(
+            'wpdh-meta',
+            "$this->plugin_url/assets/js/meta.js",
+            ['jquery'],
+            $this->version,
+            true
+        );
+
+        wp_enqueue_style(
+            'wpdh-meta',
+            "$this->plugin_url/assets/css/meta.css",
+            [],
+            $this->version
+        );
+
+        // field
+        wp_enqueue_script(
+            'wpdh-field',
+            "$this->plugin_url/assets/js/field.js",
+            ['jquery'],
+            $this->version,
+            true
+        );
+
+        wp_enqueue_style(
+            'wpdh-field',
+            "$this->plugin_url/assets/css/field.css",
+            [],
+            $this->version
+        );
+
+        wp_localize_script('wpdh', 'Wpdh', [
             'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce'    => wp_create_nonce('wpdh_repeater'),
+            'nonce'    => wp_create_nonce('wpdh_nonce'),
             'i18n'     => [],
         ]);
     }

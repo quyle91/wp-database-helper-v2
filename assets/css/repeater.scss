@@ -1,0 +1,38 @@
+.wpdh-repeater {
+    border: 2px dashed #ccc;
+    padding: 10px;
+    margin-bottom: 1em;
+
+    .wpdh-repeater-label {
+        margin-left: -10px;
+        margin-top: -10px;
+        padding: 5px;
+        background: #ededed;
+        margin-bottom: 10px;
+        margin-right: -10px;
+    }
+
+    .wpdh-repeater-item {
+        padding-left: 10px;
+        position: relative;
+        margin-bottom: 1em;
+        margin-left: 1em;
+        border-left: 5px solid #ededed;
+
+        &::before {
+            content: attr(data-index);
+            display: inline-block;
+            margin-right: 8px;
+            color: #666;
+            position: absolute;
+            top: 0px;
+            left: -15px;
+            font-weight: normal;
+        }
+    }
+
+    .button{
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+}
