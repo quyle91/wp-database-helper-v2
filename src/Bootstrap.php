@@ -2,55 +2,71 @@
 
 namespace WpDatabaseHelperV2;
 
-use \WpDatabaseHelperV2\Meta\WpMeta;
-use \WpDatabaseHelperV2\Fields\WpField;
-use \WpDatabaseHelperV2\Fields\WpRepeater;
-
 class Bootstrap {
     public static function run() {
         (new self())->init();
     }
 
     public function init() {
-        // tạo assets service, đăng ký (register) sẵn
-        \WpDatabaseHelperV2\Services\Assets::get_instance();
 
+        // metabox
         add_action('init', function () {
 
-            WpMeta::make('page')
-                ->metabox('Complex Settings')
+            // 
+            \WpDatabaseHelperV2\Meta\WpMeta::make()
+                ->post_type('page')
+                ->metabox_label('Complex Settings')
                 ->fields([
 
                     // Field cơ bản
-                    WpField::make('text', '___page_subtitle')
+                    \WpDatabaseHelperV2\Fields\WpField::make()
+                        ->kind('input')
+                        ->type('text')
+                        ->name('___page_subtitle')
                         ->label('Subtitle')
                         ->attribute(['placeholder' => 'Enter subtitle'])
-                        ->default('This is default subtitle')
-                        ->adminColumn(true),
+                        ->adminColumn(true)
+                        ->default('This is default subtitle'),
 
                     // Repeater cấp 1: FAQ
-                    WpRepeater::make('___faq_list')
+                    \WpDatabaseHelperV2\Fields\WpRepeater::make()
+                        ->name('___faq_list')
                         ->label('FAQ List')
+                        ->direction('vertical')
                         ->fields([
 
-                            WpField::make('text', '___question')
+                            \WpDatabaseHelperV2\Fields\WpField::make()
+                                ->kind('input')
+                                ->type('text')
+                                ->name('___question')
                                 ->label('Question')
                                 ->default('Question'),
 
-                            WpField::make('textarea', '___answer')
+                            \WpDatabaseHelperV2\Fields\WpField::make()
+                                ->kind('input')
+                                ->type('text')
+                                ->name('___answer')
                                 ->label('Answer')
                                 ->default('Answer'),
 
                             // Repeater cấp 2: Related links (default riêng)
-                            WpRepeater::make('___related_links')
+                            \WpDatabaseHelperV2\Fields\WpRepeater::make()
+                                ->name('___related_links')
                                 ->label('Related Links')
+                                ->direction('horizontal')
                                 ->fields([
 
-                                    WpField::make('text', '___link_title')
+                                    \WpDatabaseHelperV2\Fields\WpField::make()
+                                        ->kind('input')
+                                        ->type('text')
+                                        ->name('___link_title')
                                         ->label('Link Title')
                                         ->default('Link Title'),
 
-                                    WpField::make('text', '___link_url')
+                                    \WpDatabaseHelperV2\Fields\WpField::make()
+                                        ->kind('input')
+                                        ->type('text')
+                                        ->name('___link_url')
                                         ->label('Link URL')
                                         ->default('Link URL'),
                                 ])
@@ -62,10 +78,6 @@ class Bootstrap {
                                 ]),
                         ])
                         ->default([
-                            [
-                                '___question' => 'What is this site?',
-                                '___answer'   => 'This is a demo.',
-                            ],
                             [
                                 '___question' => 'How to contact us?',
                                 '___answer'   => 'Use the form below.',
@@ -80,9 +92,64 @@ class Bootstrap {
                                     ],
                                 ],
                             ],
+                            [
+                                '___question' => 'What is this site?',
+                                '___answer'   => 'This is a demo.',
+                            ],
                         ]),
                 ])
                 ->register();
+
+            // Field text bình thường
+            add_action('wpdh_meta_box_after', function () {
+                echo '<pre>';
+                print_r('---------- TEST INPUT without save data ----------');
+                echo '</pre>';
+                echo \WpDatabaseHelperV2\Fields\WpField::make()
+                    ->kind('input')
+                    ->type('text')
+                    ->value($this->settings['test_input'] ?? false) // giá trị đã lưu
+                    ->name('adminz_admin[test_input]')
+                    ->label('Test Input')
+                    ->attribute(['placeholder' => 'Enter test'])
+                    ->default('This is default test')
+                    ->render();
+
+                echo '<pre>';
+                print_r('---------- TEST Repeater without save data ----------');
+                echo '</pre>';
+                echo \WpDatabaseHelperV2\Fields\WpRepeater::make()
+                    ->name('adminz_admin[test_repeater]')
+                    ->value($this->settings['test_repeater'] ?? false) // giá trị đã lưu
+                    ->label('Test Repeater')
+                    ->fields([
+                        \WpDatabaseHelperV2\Fields\WpField::make()
+                            ->kind('input')
+                            ->type('text')
+                            ->name('___test_name_')
+                            ->label('Test')
+                            ->default('This is default test')
+                            ->attribute(['placeholder' => 'Enter test']),
+                        \WpDatabaseHelperV2\Fields\WpField::make()
+                            ->kind('input')
+                            ->type('text')
+                            ->name('___test_name_2')
+                            ->label('Test 2')
+                            ->default('This is default test 2')
+                            ->attribute(['placeholder' => 'Enter test 2']),
+                    ])
+                    ->default([
+                        [
+                            '___test_name_' => 'This is default test',
+                            '___test_name_2' => 'This is default test 2',
+                        ],
+                        [
+                            '___test_name_' => 'This is default test x',
+                            '___test_name_2' => 'This is default test 2 x',
+                        ],
+                    ])
+                    ->render();
+            }, 10, 2);
         });
     }
 }

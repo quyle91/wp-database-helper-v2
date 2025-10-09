@@ -19,7 +19,11 @@ class Assets {
         $this->plugin_dir = wp_normalize_path(dirname(__DIR__, 2));
         $this->plugin_url = $this->getPluginUrl($this->plugin_dir);
         $this->version = $this->getVersion();
-        add_action('admin_init', [$this, 'enqueue']);
+        if(did_action('init')){
+            $this->enqueue();        
+        }else{
+            add_action('wp_enqueue_scripts', [$this, 'enqueue']);
+        }
     }
 
     private function getVersion(): string {
@@ -45,6 +49,22 @@ class Assets {
 
     // register script/style
     public function enqueue(): void {
+
+        // global
+        wp_enqueue_script(
+            'wpdh-global',
+            plugin_dir_url(__FILE__) . 'assets/js/wpdh-global.js',
+            [],
+            '1.0',
+            true
+        );
+
+        wp_localize_script('wpdh-global', 'Wpdh', [
+            'test_wpdh' => true,
+            'ajax_url'  => admin_url('admin-ajax.php'),
+            'nonce'     => wp_create_nonce('wpdh_nonce'),
+            'i18n'      => [],
+        ]);
 
         // repeater
         wp_enqueue_script(
@@ -94,10 +114,6 @@ class Assets {
             $this->version
         );
 
-        wp_localize_script('wpdh', 'Wpdh', [
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce'    => wp_create_nonce('wpdh_nonce'),
-            'i18n'     => [],
-        ]);
+        
     }
 }

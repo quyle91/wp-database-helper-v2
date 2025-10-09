@@ -3,64 +3,128 @@
 namespace WpDatabaseHelperV2\Fields;
 
 class WpField {
-    protected string $type;
-    protected string $name;
+    protected string $id;
+    public function getId(){
+        return $this->id;
+    }
 
-    public static function make(string $type, string $name): self {
+    public function __construct() {
+        $this->id = 'id_'.wp_rand();
+    }
+
+    //
+    public static function make(): self {
+        \WpDatabaseHelperV2\Services\Assets::get_instance();
         $inst = new self();
-        $inst->type = $type;
-        $inst->name = $name;
         return $inst;
     }
 
+    // 
+    protected string $kind = 'input';
+    public function kind($kind): self {
+        $this->kind = $kind;
+        return $this;
+    }
+    public function getKind(): string {
+        return $this->kind;
+    }
+
+    protected string $type = 'number';
+    public function type(string $type): self {
+        $this->type = $type;
+        return $this;
+    }
     public function getType(): string {
         return $this->type;
     }
 
+    //
+    protected string $name;
+    public function name($name): self {
+        $this->name = $name;
+        return $this;
+    }
     public function getName(): string {
         return $this->name;
     }
 
+    //
     protected string $label = '';
     public function label(string $label): self {
         $this->label = $label;
         return $this;
     }
-
     public function getLabel(): string {
         return $this->label;
     }
 
+    //
     protected array $attributes = [];
     public function attribute(array $attrs): self {
         $this->attributes = array_merge($this->attributes, $attrs);
         return $this;
     }
+    public function getAttributes(): array {
+        return $this->attributes;
+    }
 
-    /** @var mixed */
-    protected $default = '';
-    public function default($v): self {
+    //
+    protected mixed $default = '';
+    public function default(mixed $v): self {
         $this->default = $v;
         return $this;
     }
-
     public function getDefault() {
         return $this->default;
     }
 
-    // D:\Laragon\www\flatsome\wp-content\plugins\administrator-z\vendor\quyle91\wp-database-helper-v2\src\Fields\WpField.php
-    public function render($dbValue, string $namePrefix = ''): string {
+    //
+    protected mixed $value = false;
+    public function value(mixed $v): self {
+        $this->value = $v;
+        return $this;
+    }
+    public function getValue() {
+        return $this->value;
+    }
+
+    //
+    protected string $namePrefix = '';
+    public function namePrefix(string $v): self {
+        $this->namePrefix = $v;
+        return $this;
+    }
+    public function getNamePrefix() {
+        return $this->namePrefix;
+    }
+
+    protected bool $adminColumn = false;
+    public function adminColumn(bool $enable = true): self {
+        $this->adminColumn = $enable;
+        return $this;
+    }
+
+    public function getAdminColumn(): bool {
+        return $this->adminColumn;
+    }
+
+    //
+    public function render(): string {
         ob_start();
-        
-        // dbValue false mean metadata_exists() = false -> get from default
-        if($dbValue === false) {
+
+        $dbValue = $this->value;
+        $namePrefix = $this->namePrefix;
+
+        // chưa được lưu thì load default
+        // '' : được lưu rồi thì ko làm gì cả, tôn trọng admin
+        if ($dbValue === false) {
             $dbValue = $this->default;
         }
 
         $fullName = $namePrefix ? "{$namePrefix}[{$this->name}]" : $this->name;
-        $fieldId = esc_attr(wp_rand() . '_' . $this->name);
+        $fieldId = $this->id . "_" . wp_rand(); // Cần có thêm wp_rand() bởi vì một đối tượng wpField có thể được sử dụng nhiều lần trong repeater
 
-        echo "<div class='wpdh-field wpdh-field-{$this->type}'>";
+        echo "<div class='wpdh-field wpdh-field-{$this->kind}'>";
 
         // Label
         echo "<div class='wpdh-field-label'>";
@@ -68,10 +132,10 @@ class WpField {
         echo "</div>"; // .wpdh-field-label
 
         echo "<div class='wpdh-field-control'>";
-        switch ($this->type) {
-            case 'text':
+        switch ($this->kind) {
+            case 'input':
                 $val = esc_attr($dbValue ?? '');
-                echo "<input type='text' id='{$fieldId}' name='{$fullName}' value='{$val}'" . $this->renderAttributes() . ">";
+                echo "<input id='{$fieldId}' type='{$this->type}' name='{$fullName}' value='{$val}'" . $this->renderAttributes() . ">";
                 break;
 
             case 'textarea':
@@ -79,7 +143,7 @@ class WpField {
                 echo "<textarea id='{$fieldId}' name='{$fullName}'" . $this->renderAttributes() . ">{$val}</textarea>";
                 break;
 
-                // Thêm các type khác nếu cần
+                // Thêm các kind khác nếu cần
         }
         echo "</div>"; // .wpdh-field-control
 
@@ -100,16 +164,5 @@ class WpField {
             $attrs .= ' ' . esc_attr($k) . '="' . esc_attr($v) . '"';
         }
         return $attrs;
-    }
-
-    // for wpmeta
-    protected bool $adminColumn = false;
-    public function adminColumn(bool $enable = true): self {
-        $this->adminColumn = $enable;
-        return $this;
-    }
-
-    public function isAdminColumn(): bool {
-        return $this->adminColumn;
     }
 }

@@ -1,7 +1,7 @@
 .wpdh-repeater {
     border: 2px dashed #ccc;
     padding: 10px;
-    margin-bottom: 1em;
+    margin-bottom: 10px;
 
     .wpdh-repeater-label {
         margin-left: -10px;
@@ -12,26 +12,42 @@
         margin-right: -10px;
     }
 
+    .wpdh-repeater-items {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+
+        &.horizontal {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        &.vertical {
+            flex-direction: column;
+        }
+    }
+
     .wpdh-repeater-item {
         padding-left: 10px;
         position: relative;
-        margin-bottom: 1em;
-        margin-left: 1em;
+        margin-left: 10px;
         border-left: 5px solid #ededed;
 
         &::before {
             content: attr(data-index);
-            display: inline-block;
-            margin-right: 8px;
             color: #666;
             position: absolute;
-            top: 0px;
-            left: -15px;
-            font-weight: normal;
+            top: 10px;
+            left: -11px;
+            background: white;
+            text-align: center;
+            // border: 1px solid black;
+            min-width: 1em;
+            display: inline-block;
         }
     }
 
-    .button{
+    .button {
         margin-right: 5px;
         margin-bottom: 5px;
     }

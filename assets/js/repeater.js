@@ -11,8 +11,11 @@
 
         const baseEsc = escapeForRegex(base);
 
-        $repeater.find('.wpdh-repeater-item').each(function (index) {
+        // chỉ lấy item cấp 1 trong .wpdh-repeater-items
+        $repeater.find('> .wpdh-repeater-items > .wpdh-repeater-item').each(function (index) {
             const $item = $(this);
+
+            // cập nhật name
             $item.find('[name]').each(function () {
                 const $el = $(this);
                 let name = $el.attr('name');
@@ -26,7 +29,15 @@
             });
 
             $item.attr('data-index', index);
+
+            // đệ quy cho repeater con
+            $item.find('> .wpdh-repeater').each(function () {
+                reindexRepeater($(this));
+            });
         });
+
+        // debug cấp hiện tại
+        $repeater.find('> .wpdh-debug').trigger('click');
     }
 
     // clone item
@@ -34,6 +45,7 @@
         e.preventDefault();
         const $item = $(this).closest('.wpdh-repeater-item');
         const $repeater = $item.closest('.wpdh-repeater');
+        const $container = $repeater.children('.wpdh-repeater-items');
 
         const $clone = $item.clone();
         $clone.find('input,select,textarea').each(function () {
@@ -48,23 +60,18 @@
     // remove item
     $(document).on('click', '.wpdh-remove', function (e) {
         e.preventDefault();
-        const $repeater = $(this).closest('.wpdh-repeater');
-        $(this).closest('.wpdh-repeater-item').remove();
+        const $item = $(this).closest('.wpdh-repeater-item');
+        const $repeater = $item.closest('.wpdh-repeater');
+        $item.remove();
         reindexRepeater($repeater);
     });
-
-    // $(document).ready(function () {
-    //     $('.wpdh-repeater').each(function () {
-    //         reindexRepeater($(this));
-    //     });
-    // });
 
     // up item
     $(document).on('click', '.wpdh-up', function (e) {
         e.preventDefault();
         const $item = $(this).closest('.wpdh-repeater-item');
-        const $prev = $item.prev('.wpdh-repeater-item');
         const $repeater = $item.closest('.wpdh-repeater');
+        const $prev = $item.prev('.wpdh-repeater-item');
 
         if ($prev.length) {
             $item.insertBefore($prev);
@@ -72,28 +79,30 @@
         }
     });
 
-    function collectRepeaterData($repeater) {
-        const data = {};
-        const base = $repeater.data('base');
+    // test button
+    $(document).on('click', '.wpdh-debug', function (e) {
+        e.preventDefault();
 
+        // -------------------- Simple Repeater form field names --------------------
+        const $repeater = $(this).closest('.wpdh-repeater');
+        const data = {};
         $repeater.find('input[name], textarea[name], select[name]').each(function () {
             const $el = $(this);
             const name = $el.attr('name') || '';
             const val = $el.val();
-
-            // giữ nguyên toàn bộ name, không cắt
             data[name] = val;
         });
-
-        return data;
-    }
-
-    // test button
-    $(document).on('click', '.wpdh-debug', function (e) {
-        e.preventDefault();
-        const $repeater = $(this).closest('.wpdh-repeater');
-        const data = collectRepeaterData($repeater);
         console.log('Repeater:', $repeater.data('name'), data);
+
+        // -------------------- Simple checksum (synchronous) --------------------
+        const jsonString = JSON.stringify(data);
+        let hash = 0;
+        for (let i = 0; i < jsonString.length; i++) {
+            hash = ((hash << 5) - hash) + jsonString.charCodeAt(i);
+            hash |= 0; // convert to 32-bit integer
+        }
+
+        console.log('Repeater:', $repeater.data('name'), 'Checksum:', hash);
     });
 
 })(jQuery);
