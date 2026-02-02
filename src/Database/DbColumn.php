@@ -54,7 +54,6 @@ class DbColumn {
         // Nếu chưa có → tạo object mới chỉ với name
         $instance = new self();
         $instance->name = $name;
-
         return $instance;
     }
 
