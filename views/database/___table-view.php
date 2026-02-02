@@ -17,15 +17,9 @@
 
         <!-- Multi-column search -->
         <div class="wpdh-field-wrap">
-            <?php foreach ($fields as $col => $fieldMeta):
-                $column = $fieldMeta['column'];
-                $dbMeta = $fieldMeta['db'];
-
-                // Type ưu tiên DbColumn, fallback DB
-                // $type = method_exists($column, 'getType')
-                //     ? $column->getType()
-                //     : ($dbMeta['type'] ?? 'text');
-                $type = $dbMeta['type'] ?? 'text';
+            <?php foreach ($fields as $field):
+                $col = $field->getName();
+                $type = method_exists($field, 'getType') ? $field->getType() : 'text';
             ?>
                 <div class="wpdh-field">
                     <label for="search_<?= esc_attr($col) ?>">
@@ -73,11 +67,10 @@
                 <select name="order_by">
                     <?php
                     $current_order_by = $_GET['order_by'] ?? 'id';
-                    foreach ($fields as $col => $fieldMeta):
+                    foreach ($fields as $field):
+                        $col = $field->getName();
                     ?>
-                        <option value="<?= esc_attr($col) ?>" <?= $col === $current_order_by ? 'selected' : '' ?>>
-                            <?= esc_html($col) ?>
-                        </option>
+                        <option value="<?= esc_attr($col) ?>" <?= $col === $current_order_by ? 'selected' : '' ?>><?= esc_html($col) ?></option>
                     <?php endforeach; ?>
                 </select>
             </label>
@@ -109,36 +102,30 @@
 
         <!-- fields -->
         <div class="wpdh-field-wrap">
-            <?php foreach ($fields as $col => $fieldMeta):
-                $column = $fieldMeta['column'];
-                $dbMeta = $fieldMeta['db'];
-
-                // type ưu tiên DbColumn
-                // $type = method_exists($column, 'getType')
-                //     ? $column->getType()
-                //     : ($dbMeta['type'] ?? 'text');
-                $type = $dbMeta['type'] ?? 'text';
-
-                if (method_exists($column, 'isAutoIncrement') && $column->isAutoIncrement()):
-            ?>
+            <?php foreach ($fields as $field):
+                $col = $field->getName();
+                $type = method_exists($field, 'getType') ? $field->getType() : 'text';
+                if ($field->isAutoIncrement()): ?>
                     <div class="wpdh-field">
                         <div>
                             <label>
                                 <?= esc_html($col); ?>
-                                <small><?= esc_html($type) ?></small>
+                                <small>
+                                    <?php echo esc_html($type) ?>
+                                </small>
                             </label>
                         </div>
-                        <input type="text" disabled value="AUTO">
+                        <input type="text" disabled value="id">
                     </div>
-                <?php
-                    continue;
-                endif;
-                ?>
+                <?php continue;
+                endif; ?>
                 <div class="wpdh-field">
                     <div>
                         <label for="create_<?= esc_attr($col) ?>">
                             <?= esc_html($col); ?>
-                            <small><?= esc_html($type) ?></small>
+                            <small>
+                                <?php echo esc_html($type) ?>
+                            </small>
                         </label>
                     </div>
                     <input type="text" id="create_<?= esc_attr($col) ?>" name="<?= esc_attr($col) ?>">
@@ -163,8 +150,8 @@
                     <th>
                         <input type="checkbox" id="wpdh-select-all">
                     </th>
-                    <?php foreach ($fields as $col => $fieldMeta): ?>
-                        <th><?php echo esc_html($col); ?></th>
+                    <?php foreach ($fields as $field): ?>
+                        <th><?php echo esc_html($field->getName()); ?></th>
                     <?php endforeach; ?>
                 </tr>
             </thead>
@@ -176,7 +163,8 @@
                             <td>
                                 <input type="checkbox" class="wpdh-select-row" name="wpdh_selected[]" value="<?= esc_attr($row->id) ?>">
                             </td>
-                            <?php foreach ($fields as $col => $fieldMeta): ?>
+                            <?php foreach ($fields as $field): ?>
+                                <?php $col = $field->getName(); ?>
                                 <td>
                                     <div class="wpdh-db-cell-wrap">
                                         <span class="wpdh-db-cell-value">

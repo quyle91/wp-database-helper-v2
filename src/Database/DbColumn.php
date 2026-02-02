@@ -58,7 +58,7 @@ class DbColumn {
         return $instance;
     }
 
-    protected string $type;
+    protected string $type = 'VARCHAR(255)';
     public function type(string $type): self {
         $this->type = strtoupper($type);
         return $this;

@@ -220,75 +220,6 @@ class DbTable {
         return $this;
     }
 
-    public function getDbColumns(): array {
-        global $wpdb;
-
-        // Nếu chưa có table name
-        if (empty($this->name)) {
-            return [];
-        }
-
-        $results = $wpdb->get_results(
-            "SHOW COLUMNS FROM {$this->name}",
-            ARRAY_A
-        );
-
-        $columns = [];
-
-        foreach ($results as $row) {
-            $columns[$row['Field']] = [
-                'name'     => $row['Field'],
-                'type'     => $row['Type'],
-                'nullable' => $row['Null'] === 'YES',
-                'key'      => $row['Key'],
-                'default'  => $row['Default'],
-                'extra'    => $row['Extra'],
-            ];
-        }
-
-        return $columns;
-    }
-
-    // get runtime columns
-    public function getRuntimeColumns(): array {
-        $dbColumns = $this->getDbColumns();
-
-        // Declared fields (giữ nguyên)
-        $declared = [];
-
-        foreach ((array) $this->fields as $field) {
-            if (!$field instanceof DbColumn) {
-                continue;
-            }
-
-            $declared[$field->getName()] = $field;
-        }
-
-        $runtime = [];
-
-        foreach ($dbColumns as $name => $meta) {
-
-            // Column được khai báo bằng code
-            if (isset($declared[$name])) {
-                $runtime[$name] = [
-                    'source' => 'declared',
-                    'column' => $declared[$name],
-                    'db'     => $meta,
-                ];
-                continue;
-            }
-
-            // Column add tay trong DB
-            $runtime[$name] = [
-                'source' => 'database',
-                'column' => DbColumn::getByName($name), // chỉ dùng name
-                'db'     => $meta,
-            ];
-        }
-
-        return $runtime;
-    }
-
     public function renderAdminPage() {
         // Nếu bảng chưa tồn tại
         if (!$this->exists()) {
@@ -334,28 +265,14 @@ class DbTable {
         // Handle create record action
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['wpdh_action'] ?? '') === 'create') {
             $data = [];
-
-            foreach ((array) $this->fields as $field) {
-                if (!$field instanceof DbColumn) {
-                    continue;
-                }
-
+            foreach ($this->fields as $field) {
                 $col = $field->getName();
-
-                // Skip id auto increment
-                if ($col === 'id') {
-                    continue;
-                }
-
-                if (isset($_POST[$col])) {
-                    $data[$col] = sanitize_text_field($_POST[$col]);
-                }
+                if ($col === 'id') continue;
+                if (isset($_POST[$col])) $data[$col] = sanitize_text_field($_POST[$col]);
             }
-
-            if (!empty($data)) {
+            if ($data) {
                 $wpdb->insert($table, $data);
             }
-
             echo '<meta http-equiv="refresh" content="0;url=?page=' . esc_attr($this->name) . '">';
             return;
         }
@@ -366,15 +283,8 @@ class DbTable {
         $params = [];
 
         if (is_array($search_params)) {
-            // foreach ($this->fields as $field) {
-            //     $col = $field->getName();
-            //     if (!empty($search_params[$col])) {
-            //         $like = '%' . $wpdb->esc_like(trim($search_params[$col])) . '%';
-            //         $where_parts[] = "`{$col}` LIKE %s";
-            //         $params[] = $like;
-            //     }
-            // }
-            foreach ($this->getDbColumns() as $col => $meta) {
+            foreach ($this->fields as $field) {
+                $col = $field->getName();
                 if (!empty($search_params[$col])) {
                     $like = '%' . $wpdb->esc_like(trim($search_params[$col])) . '%';
                     $where_parts[] = "`{$col}` LIKE %s";
@@ -417,9 +327,8 @@ class DbTable {
         }
 
         // fields
-        // $fields = $this->fields;
-        // Runtime schema (DB là source of truth)
-        $fields = $this->getRuntimeColumns();
+        $fields = $this->fields;
+        // echo '<pre>'; print_r($fields); echo '</pre>'; die;
 
         // Render view
         echo '<div class="wrap">';
@@ -457,16 +366,8 @@ class DbTable {
         }
 
         $table = \WpDatabaseHelperV2\Database\DbTable::getByName($table_name);
-        // if (!$table->hasColumn($column_name)) {
-        //     wp_send_json_error(['message' => "Field '$column_name' does not exist in table"]);
-        // }
-        $dbColumns = $table->getDbColumns();
-
-        // Column phải tồn tại trong DB thật
-        if (!isset($dbColumns[$column_name])) {
-            wp_send_json_error([
-                'message' => "Field '{$column_name}' does not exist in database"
-            ]);
+        if (!$table->hasColumn($column_name)) {
+            wp_send_json_error(['message' => "Field '$column_name' does not exist in table"]);
         }
 
         $record_id = intval($record_id);
