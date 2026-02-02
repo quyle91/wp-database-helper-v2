@@ -1,6 +1,7 @@
 @echo off
 rem Script to copy and synchronize source folder with Git folder
 
+
 rem Define variables for source folder and Git folder
 set SOURCE_FOLDER=D:\Laragon\www\flatsome\wp-content\plugins\administrator-z\vendor\quyle91\wp-database-helper-v2
 set GIT_FOLDER=D:\source\git\wp-database-helper-v2\
