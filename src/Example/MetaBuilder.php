@@ -678,7 +678,7 @@ final class MetaBuilder {
     public function read() {
 
         //
-        if(!$this->dbValue){
+        if (!$this->dbValue) {
             return;
         }
 
@@ -689,7 +689,9 @@ final class MetaBuilder {
             }
 
             // continue;
-            // echo '<pre>'; print_r($metabox_builder); echo '</pre>'; die;
+            echo '<pre>';
+            print_r($metabox_builder);
+            echo '</pre>';
 
             $WpMeta = \WpDatabaseHelperV2\Meta\WpMeta::make();
             $WpMeta->post_type($metabox_builder['_post_type'] ?? '');
@@ -781,6 +783,34 @@ final class MetaBuilder {
                 // nothing
 
                 /** ----------- Repeater ----------- */
+                // 
+                $childDirection = $fieldSetting[$kind . '_childDirection'] ?? '';
+                $this->__set_value($fieldObject, 'childDirection', $childDirection);
+                // build repeater children fields
+                if ($kind === 'repeater') {
+
+                    // lấy danh sách field con
+                    $children_raw = $fieldSetting['fields'] ?? [];
+
+                    $children_objects = [];
+
+                    foreach ((array)$children_raw as $child_field) {
+
+                        //
+                        $kind = $child_field['kind'] ?? '';
+                        $child_field['object'] = 'WpField';
+
+                        if ($kind === 'repeater') {
+                            $child_field['object'] = 'WpRepeater';
+                        }
+
+                        // convert sang object (có xử lý đệ quy bên trong rồi)
+                        $children_objects[] = $this->field_convert_to_object_func($child_field);
+                    }
+
+                    // set vào repeater
+                    $this->__set_value($fieldObject, 'fields', $children_objects);
+                }
 
                 // 
                 $childDirection = $fieldSetting[$kind . '_childDirection'] ?? '';
@@ -798,6 +828,8 @@ final class MetaBuilder {
                 //
                 $fields[] = $fieldObject;
             }
+
+            // echo '<pre>'; print_r($fields); echo '</pre>'; die;
 
             //
             $WpMeta->fields($fields);
@@ -1013,6 +1045,21 @@ final class MetaBuilder {
         }
         if (($field['object'] ?? '') == 'WpRepeater') {
             $fieldObject = \WpDatabaseHelperV2\Fields\WpRepeater::make();
+        }
+
+        // build general_attributes -> attributes
+        $general_attributes = $field['general_attributes'] ?? [];
+        $attributes = [];
+        foreach ((array)$general_attributes as $attr) {
+            $attr_key = $attr['key'] ?? '';
+            $attr_value = $attr['value'] ?? '';
+
+            if ($attr_key && $attr_value) {
+                $attributes[$attr_key] = $attr_value;
+            }
+        }
+        if (!empty($attributes) && method_exists($fieldObject, 'attributes')) {
+            $fieldObject->attributes($attributes);
         }
 
         foreach ((array)$field as $method_name => $method_value) {

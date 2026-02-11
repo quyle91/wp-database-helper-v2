@@ -85,7 +85,8 @@ class WpRepeater {
 
     // 
     protected array $notes = [];
-    public function notes(array $notes): self {
+    public function notes(mixed $notes): self {
+        $notes = (array)$notes;
         $this->notes = $notes;
         return $this;
     }
@@ -174,7 +175,8 @@ class WpRepeater {
 
     // 
     protected array $classes = ['wpdh-repeater-items'];
-    public function classes(array $classes): self {
+    public function classes(mixed $classes): self {
+        $classes = (array) $classes;
         $this->classes = $classes;
         return $this;
     }
@@ -238,7 +240,8 @@ class WpRepeater {
 
     // Repeater items phải có cấu trúc giống hệt nhau và được khai báo từ trước.
     protected array $fields = [];
-    public function fields(array $fields): self {
+    public function fields(mixed $fields): self {
+        $fields = (array) $fields;
         $this->fields = $fields;
         return $this;
     }

@@ -95,7 +95,8 @@ class WpField {
 
     //
     protected array $attributes = [];
-    public function attributes(array $attrs): self {
+    public function attributes(mixed $attrs): self {
+        $attrs = (array) $attrs;
         // error_log(__CLASS__ . '::' . __FUNCTION__ . '() $this->name: ' . var_export($this->name, true));
         // error_log(__CLASS__ . '::' . __FUNCTION__ . '() $attrs: ' . var_export($attrs, true));
         $this->attributes = array_merge($this->attributes, $attrs);
@@ -157,7 +158,8 @@ class WpField {
 
     // 
     protected array $notes = [];
-    public function notes(array $notes): self {
+    public function notes(mixed $notes): self {
+        $notes = (array)$notes;
         $this->notes = $notes;
         return $this;
     }
@@ -213,7 +215,8 @@ class WpField {
 
     //
     protected array $tabNavs = [];
-    public function tabNavs(array $items = []): self {
+    public function tabNavs(mixed $items = []): self {
+        $items = (array) $items;
         $this->tabNavs = $items;
         return $this;
     }
@@ -333,7 +336,8 @@ class WpField {
 
     //
     protected array $classes = [];
-    public function classes(array $classes): self {
+    public function classes(mixed $classes): self {
+        $classes = (array) $classes;
         $this->classes = $classes;
         return $this;
     }
@@ -392,8 +396,6 @@ class WpField {
     //
     protected string $renderId = '';
     public function render(): string {
-        error_log(__CLASS__ . '::' . __FUNCTION__ . '() $this->name: ' . json_encode($this->name, true));
-
         $this->renderId = $this->id . "_" . rand();
         $dbValue = $this->value;
         $namePrefix = $this->namePrefix;
@@ -649,6 +651,9 @@ class WpField {
         if (!empty($this->notes)) {
             echo "<div class='wpdh-field-notes'>";
             foreach ((array)$this->notes as $key => $note) {
+                if (!$note) {
+                    continue;
+                }
                 // add star 
                 $star_html = '';
                 for ($i = 0; $i < ($key + 1); $i++) {

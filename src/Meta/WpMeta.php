@@ -451,6 +451,12 @@ class WpMeta {
 
 
     public function displayValue($value, $fieldToArray) {
+        //
+        $kind = $fieldToArray['kind'] ?? '';
+        $type = $fieldToArray['type'] ?? '';
+        $options = $fieldToArray['options'] ?? [];
+
+
         // default 
         $return = $value;
         if (is_array($value)) {
@@ -480,12 +486,12 @@ class WpMeta {
 
         // wp_media
         if (
-            in_array($fieldToArray['kind'], ['input']) and
-            in_array($fieldToArray['type'], ['wp_media', 'wp_multiple_media']) and
+            in_array($kind, ['input']) and
+            in_array($type, ['wp_media', 'wp_multiple_media']) and
             !empty($value)
         ) {
             $return .= "<div class='wpdh-media-preview'>";
-            if ($fieldToArray['type'] == 'wp_multiple_media') {
+            if ($type == 'wp_multiple_media') {
                 $image_ids = unserialize($value);
             } else {
                 $image_ids = [$value];
@@ -504,20 +510,20 @@ class WpMeta {
 
         // select options
         if (
-            in_array($fieldToArray['kind'], ['select']) and
-            isset($fieldToArray['options'][$value])
+            in_array($kind, ['select']) and
+            isset($options[$value])
         ) {
-            $return = $fieldToArray['options'][$value];
+            $return = $options[$value];
             return $return;
         }
 
         // checkbox, radio options
         if (
-            in_array($fieldToArray['kind'], ['input']) and
-            in_array($fieldToArray['type'], ['checkbox', 'radio']) and
-            isset($fieldToArray['options'][$value])
+            in_array($kind, ['input']) and
+            in_array($type, ['checkbox', 'radio']) and
+            isset($options[$value])
         ) {
-            $return = $fieldToArray['options'][$value];
+            $return = $options[$value];
             return $return;
         }
 
