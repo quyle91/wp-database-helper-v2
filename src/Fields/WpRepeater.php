@@ -99,7 +99,8 @@ class WpRepeater {
 
     //
     protected array $default = [];
-    public function default(array $data): self {
+    public function default($data): self {
+        $data = (array) $data; // force array
         $this->default = $data;
         return $this;
     }

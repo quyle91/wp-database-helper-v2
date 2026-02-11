@@ -810,7 +810,16 @@ final class MetaBuilder {
         if (method_exists($object, $method_name)) {
             $object->{$method_name}($value);
         } else {
-            error_log('method not found: ' . $method_name . ' => ' . json_encode($value));
+            $debug = implode(
+                ', ',
+                [
+                    'method not found',
+                    get_class($object),
+                    $method_name,
+                    json_encode($value),
+                ]
+            );
+            error_log($debug);
         }
     }
 
@@ -1026,7 +1035,16 @@ final class MetaBuilder {
             if (method_exists($fieldObject, $method_name)) {
                 $fieldObject->{$method_name}($method_value); // ✅ call method
             } else {
-                error_log('method not found: ' . $method_name . ' => ' . json_encode($method_value));
+                $debug = implode(
+                    ', ',
+                    [
+                        'method not found',
+                        get_class($fieldObject),
+                        $method_name,
+                        json_encode($method_value),
+                    ]
+                );
+                error_log($debug);
             }
 
             // fix for 'data-append-config' => 'inherit' 
