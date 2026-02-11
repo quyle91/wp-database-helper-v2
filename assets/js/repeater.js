@@ -273,8 +273,9 @@
     // 4️⃣ Click toggle button
     $(document).on('click', '.wpdh-extend-view', function () {
         const fieldParent = $(this).closest('.wpdh-repeater-item'); // get parent container
-        const siblingFields = fieldParent.children('.wpdh-field, .wpdh-repeater').not('.wpdh-field-visible-show');
-        // console.log('wpdh-field-toggle-button', siblingFields);
+        const siblingFields = fieldParent.children('.wpdh-repeater-item-wrap').children('.wpdh-field, .wpdh-repeater').not('.wpdh-field-visible-show');
+        console.log('fieldParent', fieldParent);
+        console.log('wpdh-field-toggle-button', siblingFields);
 
         // 
         fieldParent.toggleClass('toggled');
