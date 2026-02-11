@@ -795,7 +795,6 @@ final class MetaBuilder {
                     $this->__set_value($fieldObject, 'tabNavs', $tabNavs);
                 }
 
-
                 //
                 $fields[] = $fieldObject;
             }

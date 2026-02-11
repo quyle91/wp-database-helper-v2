@@ -392,6 +392,7 @@ class WpField {
     //
     protected string $renderId = '';
     public function render(): string {
+        error_log(__CLASS__ . '::' . __FUNCTION__ . '() $this->name: ' . json_encode($this->name, true));
 
         $this->renderId = $this->id . "_" . rand();
         $dbValue = $this->value;
