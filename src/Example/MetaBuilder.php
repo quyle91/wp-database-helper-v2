@@ -4,6 +4,8 @@ namespace WpDatabaseHelperV2\Example;
 
 final class MetaBuilder {
 
+    private $self_debug = false;
+
     private $schema = [
         [
             'object' => 'WpField',
@@ -838,7 +840,7 @@ final class MetaBuilder {
     function __set_value($object, $method_name, $value) {
         if (method_exists($object, $method_name)) {
             $object->{$method_name}($value);
-        } else {
+        } else if($this->self_debug) {
             $debug = implode(
                 ', ',
                 [
@@ -1036,6 +1038,7 @@ final class MetaBuilder {
     }
 
     public function field_convert_to_object_func($field) {
+        // error_log(__CLASS__ . '::' . __FUNCTION__ . '() $field: ' . print_r($field, true));
 
         // create object
         if (($field['object'] ?? '') == 'WpField') {
@@ -1078,7 +1081,7 @@ final class MetaBuilder {
 
             if (method_exists($fieldObject, $method_name)) {
                 $fieldObject->{$method_name}($method_value); // ✅ call method
-            } else {
+            } else if($this->self_debug) {
                 $debug = implode(
                     ', ',
                     [
